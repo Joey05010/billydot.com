@@ -1,12 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/png" href="assets/Logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Andzile B. Dlamini · UX &amp; Product Designer</title>
+    <meta name="description" content="UX and product designer in Eswatini. Case studies on a shipped referral program, a mobile wallet sign-up and a clinic ordering app, each with a clickable prototype.">
+    <meta property="og:title" content="Andzile B. Dlamini · UX &amp; Product Designer">
+    <meta property="og:description" content="Case studies on a shipped referral program, a mobile wallet sign-up and a clinic ordering app, each with a clickable prototype.">
+    <meta property="og:image" content="https://billydot.com/assets/Referral/mockup.jpg">
+    <meta property="og:url" content="https://billydot.com/">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-color: #ffffff;
+            --accent-glow: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('assets/bg.png') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* STICKY GLASS NAVIGATION */
+        nav {
+            position: sticky;
+            top: 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+            margin-bottom: -40px;
+        }
+
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 12px 60px;
+            display: flex;
+            gap: 60px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-glass a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-glass a:hover {
+            opacity: 0.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 80px 20px 20px;
+        }
+
+        /* TYPOGRAPHY */
+        section { scroll-margin-top: 90px; }
+        .hero { text-align: center; padding: 70px 0 10px; }
+        .hero h1 { font-size: 3.4rem; margin: 0; font-weight: normal; line-height: 1.15; }
+        .hero .role {
+            font-family: 'Press Start 2P', cursive; font-size: 0.85rem; letter-spacing: 1px;
+            margin: 22px 0 0; color: #fff; text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.15);
+        }
+        .hero .intro { font-family: 'Open Sans', sans-serif; font-size: 1.1rem; line-height: 1.7; max-width: 620px; margin: 22px auto 0; opacity: 0.92; }
+        .hero .where { font-family: 'Open Sans', sans-serif; font-size: 0.9rem; opacity: 0.75; margin: 10px 0 0; }
+        .hero .cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+        .btn-solid {
+            display: inline-block; padding: 10px 30px; border-radius: 25px; background: #fff; color: #111;
+            text-decoration: none; font-family: 'Open Sans', sans-serif; font-weight: 600; font-size: 0.9rem; transition: 0.3s;
+        }
+        .btn-solid:hover { background: rgba(255,255,255,0.85); }
+        .about-text p, .case-content p, .skills-grid ul { font-family: 'Open Sans', sans-serif; }
+        .about-text p { font-size: 1rem; line-height: 1.75; }
+        .case-content p { font-size: 0.95rem; line-height: 1.65; opacity: 0.92; }
+        .case-meta { font-family: 'Open Sans', sans-serif; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.7; margin: 0 0 6px; }
+        .case-content h3 { margin: 0 0 6px; }
+        .tool-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .tool-chips span { font-family: 'Open Sans', sans-serif; font-size: 0.78rem; padding: 4px 12px; border: 1px solid var(--glass-border); border-radius: 20px; }
+        .contact-alt { font-family: 'Open Sans', sans-serif; text-align: center; margin: -10px 0 24px; opacity: 0.9; }
+        .contact-alt a { color: #fff; }
+
+        h2 { margin: 80px 0 30px; font-weight: normal; font-size: 1.8rem; text-align: center; }
+
+        /* GLASS CARD COMPONENT */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .flex-card {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .profile-img { 
+            width: 300px; 
+            border-radius: 15px; 
+            box-shadow: 10px 10px 0px rgba(255,255,255,0.1); 
+        }
+
+        /* SKILLS GRID */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        .skill-icons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        
+        .skill-icon { 
+            width: 45px; 
+            height: 45px; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+        }
+        .skill-icon img {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+        }
+
+        /* CASE STUDIES */
+        .case-img { width: 40%; border-radius: 10px; }
+        .btn-pill {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 30px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-pill:hover { background: rgba(255,255,255,0.25); }
+
+        /* CONTACT FORM */
+        .form-group { margin-bottom: 20px; font-family: 'Open Sans', sans-serif; text-align: left;}
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: var(--accent-glow);
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            box-sizing: border-box;
+            outline: none;
+        }
+        input:focus, textarea:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); }
+        #form-status { font-family: 'Open Sans', sans-serif; font-size: 0.9rem; color: #bbf7d0; display: none; margin: 0; }
+
+        @media (max-width: 768px) {
+            .flex-card { flex-direction: column; text-align: center; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .profile-img, .case-img { width: 100%; }
+            .nav-glass { padding: 10px 18px; gap: 14px; font-size: 0.62rem; letter-spacing: 1px; }
+            .nav-glass a { white-space: nowrap; }
+            .hero { padding-top: 60px; }
+            .hero h1 { font-size: 2.4rem; }
+            .hero .role { font-size: 0.68rem; line-height: 1.8; }
+            .hero .intro { font-size: 1rem; }
+        }
+    </style>
 </head>
 <body>
-    <p>Still in production...</p>
-    <img src="yes/yes..jpeg">
+
+    <nav>
+        <div class="nav-glass">
+            <a href="#">Home</a>
+            <a href="#about">About</a>
+            <a href="#cases">Case studies</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="hero">
+            <h1>Andzile B. Dlamini</h1>
+            <p class="role">UX &amp; Product Designer</p>
+            <p class="intro">I design and prototype digital products, then check the data to see whether they work for the people using them. Right now that means growth and product work at Tini Express, a cross-border shopping service.</p>
+            <p class="where">Based in Eswatini &middot; Open to remote roles</p>
+            <div class="cta">
+                <a href="#cases" class="btn-solid">See my work</a>
+                <a href="https://www.linkedin.com/in/andzile-billy-dlamini-4029a6223/" target="_blank" rel="noopener" class="btn-pill" style="margin-top:0">LinkedIn</a>
+            </div>
+        </header>
+
+        <section id="about">
+            <h2>About Me</h2>
+            <div class="glass-card flex-card">
+                <div class="about-text">
+                    <p>Since September 2026 I've been the Growth &amp; Marketing Intern at Tini Express, where my work spans UX and product. I designed and launched its first referral program, and used PostHog data to diagnose the sign-in friction that was pushing returning customers into guest checkout, then designed a fix.</p>
+                    <p>Before that I freelanced as a UX and web designer, on a clinic's prescription ordering app and a website for a job-placement agency, and interned in creative, graphic and motion design. I hold the Google UX Design Professional Certificate (2025).</p>
+                    <p>I enjoy working closely with developers, and I like going back to the numbers after launch to see what actually changed.</p>
+                </div>
+                <img src="assets/me.png" alt="Andzile B. Dlamini" class="profile-img">
+            </div>
+        </section>
+
+        <h2>Skills</h2>
+        <div class="glass-card">
+            <div class="skills-grid">
+                <div>
+                    <h4>Technical Skills</h4>
+                    <div class="skill-icons">
+                        <div class="skill-icon" style="background:#1E1E1E"><img src="assets/Figma.svg" alt="Figma"></div>
+                        <div class="skill-icon" style="background:#001e36"><img src="assets/Photoshop.svg" alt="Photoshop"></div>
+                        <div class="skill-icon" style="background:#00005b"><img src="assets/Aftereffects.png" alt="After Effects"></div>
+                        <div class="skill-icon" style="background:#330000"><img src="assets/Illustrator.png" alt="Illustrator"></div>
+                        <div class="skill-icon" style="background:#ffffff"><img src="assets/Framer.png" alt="Framer"></div>
+                        <div class="skill-icon" style="background:#FFDD33"><img src="assets/Miro.svg" alt="Miro"></div>
+                    </div>
+                    <div class="tool-chips"><span>PostHog</span><span>Notion</span><span>Make.com</span></div>
+                </div>
+                <div>
+                    <h4>Soft Skills</h4>
+                    <ul style="list-style:none; padding:0; font-size: 0.9rem; opacity: 0.9;">
+                        <li>Communication</li>
+                        <li>Working with developers</li>
+                        <li>Strategic thinking</li>
+                        <li>Problem solving</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Hard Skills</h4>
+                    <ul style="list-style:none; padding:0; font-size: 0.9rem; opacity: 0.9;">
+                        <li>User research &amp; usability testing</li>
+                        <li>Information architecture</li>
+                        <li>Interaction design</li>
+                        <li>Wireframing &amp; prototyping</li>
+                        <li>Product analytics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <section id="cases">
+            <h2>Case Studies</h2>
+            <div class="glass-card flex-card">
+                <img src="assets/Referral/mockup.jpg" alt="Tini Express referral program" class="case-img">
+                <div class="case-content">
+                    <p class="case-meta">Tini Express &middot; Live product &middot; 2026</p>
+                    <h3>Tini Express Referral Program</h3>
+                    <p>Designed the flow, reward logic and checkout for the company's first referral program. 44 new accounts came through referral links in its first three and a half weeks.</p>
+                    <a href="Referral.html" class="btn-pill">View</a>
+                </div>
+            </div>
+
+            <div class="glass-card flex-card">
+                <img src="assets/Onboarding/mockedup.png" alt="Banking App" class="case-img">
+                <div class="case-content">
+                    <p class="case-meta">Mobile wallet &middot; 4 weeks</p>
+                    <h3>Streamlining Mobile Banking onboarding flow</h3>
+                    <p>Redesigned a mobile wallet's sign-up around plain language, clear security cues and a shorter ID check. 90% of about 15 testers finished it without help.</p>
+                    <a href="onboarding.html" class="btn-pill">View</a>
+                </div>
+            </div>
+
+            <div class="glass-card flex-card">
+                <img src="assets/Phile/image1.png" alt="Prescription order flow" class="case-img">
+                <div class="case-content">
+                    <p class="case-meta">Clinic app &middot; Freelance &middot; 4 weeks</p>
+                    <h3>Ekuphileni app, Prescription order flow</h3>
+                    <p>Designed how elderly and ill patients order medication from home and collect it at the clinic, with or without a prescription.</p>
+                    <a href="Phile.html" class="btn-pill">View</a>
+                </div>
+            </div>
+
+            <!--<div class="glass-card flex-card">
+                <img src="assets/Sonrize/Mockup.png" alt="Banking App" class="case-img">
+                <div class="case-content">
+                    <h3>Sonrize consultancy landing page</h3>
+                    <p style="font-size: 0.9rem; opacity: 0.8;">Designing and developing a high-converting landing page for a specialized job placement agency.</p>
+                    <a href="Sonrize.html" class="btn-pill">View</a>
+                </div>
+            </div>-->
+
+            
+        </section>
+
+        <section id="contact">
+            <h2>Get in touch</h2>
+            <p class="contact-alt">Send a message below, or <a href="https://www.linkedin.com/in/andzile-billy-dlamini-4029a6223/" target="_blank" rel="noopener">connect with me on LinkedIn</a>.</p>
+            <div class="glass-card" style="max-width: 600px; margin: 0 auto 80px; text-align: center;">
+                <form id="my-form" action="https://formspree.io/f/mykgaqdk" method="POST">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" name="name" placeholder="Type here.." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your email *</label>
+                        <input type="email" name="email" placeholder="Type here.." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your message *</label>
+                        <textarea name="message" placeholder="Type here.." required style="height: 120px; resize: none;"></textarea>
+                    </div>
+                    <input type="hidden" name="_subject" value="New Portfolio Message">
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
+                        <p id="form-status">Thank you, message sent!</p>
+                        <button id="submit-btn" type="submit" class="btn-pill">Send</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const form = document.getElementById("my-form");
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const status = document.getElementById("form-status");
+            const btn = document.getElementById("submit-btn");
+            const data = new FormData(event.target);
+            btn.disabled = true;
+            btn.innerHTML = "Sending...";
+            fetch(event.target.action, {
+                method: form.method,
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            }).then(response => {
+                if (response.ok) {
+                    status.style.display = "block";
+                    form.reset();
+                    btn.disabled = false;
+                    btn.innerHTML = "Send";
+                    setTimeout(() => { status.style.display = "none"; }, 5000);
+                } else {
+                    alert("Oops! There was a problem submitting your form");
+                    btn.disabled = false;
+                    btn.innerHTML = "Send";
+                }
+            }).catch(error => {
+                alert("Oops! There was a problem submitting your form");
+                btn.disabled = false;
+                btn.innerHTML = "Send";
+            });
+        }
+        form.addEventListener("submit", handleSubmit);
+    </script>
 </body>
+
 </html>
+
+
+
+
+

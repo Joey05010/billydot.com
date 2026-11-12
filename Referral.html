@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="assets/Logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Study - Tini Express Referral Program</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-color: #ffffff;
+            --accent-glow: rgba(255, 255, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('assets/bg.png') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* NAVIGATION */
+        nav { position: sticky; top: 20px; z-index: 1000; display: flex; justify-content: center; padding: 0 20px; }
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 12px 60px;
+            display: flex;
+            gap: 60px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        .nav-glass a { color: white; text-decoration: none; transition: 0.3s; }
+        section { scroll-margin-top: 90px; }
+        .nav-glass a:hover { opacity: 0.6; }
+
+        /* HERO SECTION */
+        .hero-case {
+            height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 28px;
+            background: url('assets/Referral/mockup.jpg') no-repeat center 25%;
+            background-size: cover;
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .hero-title-frame {
+            background: rgb(15 12 30 / 72%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 18px 40px;
+            margin: 0 16px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .hero-title-frame h1 { margin: 0; font-size: 2.5rem; font-weight: normal; }
+        .hero-title-frame span { font-family: 'Press Start 2P', cursive; font-size: 1.1rem; display: block; margin-top: 12px; color: rgba(255,255,255,0.8); }
+
+        /* PROJECT OVERVIEW */
+        .overview-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 60px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin: 0 auto 60px auto;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .overview-item h4 { font-size: 1.3rem; margin-bottom: 10px; font-weight: normal; }
+        .overview-item p, .overview-item ul { font-family: 'Open Sans', sans-serif; opacity: 0.8; font-size: 0.95rem; margin: 0; padding: 0; list-style: none; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; text-align: center; }
+
+        /* CONTENT COMPONENTS */
+        h2 { margin: 80px 0 30px; font-weight: normal; font-size: 2rem; border-bottom: 1px solid var(--glass-border); display: inline-block; padding-bottom: 10px; }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; margin: 40px 0; text-align: left; }
+        .diagram-img { width: 100%; border-radius: 12px; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 40px 0; }
+
+        /* KEY PRIORITIES - FIXED ALIGNMENT */
+        .priority-list { list-style: none; padding: 0; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .priority-item { 
+            display: flex; 
+            align-items: center; /* Vertically centers icon with text */
+            gap: 30px; 
+            margin-bottom: 30px; 
+            font-family: 'Open Sans', sans-serif; 
+            max-width: 700px; 
+            width: 100%;
+            text-align: left; 
+        }
+        .priority-icon { 
+            width: 65px; 
+            height: 65px; 
+            flex-shrink: 0; /* Prevents icon from distorting */
+            object-fit: contain;
+        }
+        .priority-item span { line-height: 1.5; font-size: 1rem; opacity: 0.9; }
+        .priority-badge {
+            width: 65px; height: 65px; flex-shrink: 0; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: #FFC21A; color: #1a1a1a;
+            font-family: 'Press Start 2P', cursive; font-size: 0.85rem;
+            box-shadow: 0 0 18px rgba(255, 194, 26, 0.35);
+        }
+        .priority-item span.priority-badge { opacity: 1; line-height: 1; font-size: 0.85rem; }
+
+        /* PROTOTYPE BUTTON */
+        .btn-prototype {
+            display: inline-block;
+            margin: 40px 0;
+            padding: 18px 45px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            border-radius: 5px;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        .btn-prototype:hover { transform: translateY(-3px); box-shadow: 0 5px 25px rgba(255,255,255,0.4); }
+
+        /* CONTACT FORM */
+        .form-group { margin-bottom: 25px; font-family: 'Open Sans', sans-serif; text-align: left;}
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; opacity: 0.9; }
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.1); }
+        .btn-pill {
+            padding: 10px 35px;
+            background: transparent;
+            border: 1px solid white;
+            border-radius: 25px;
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-pill:hover { background: white; color: black; }
+        #form-status { font-family: 'Open Sans', sans-serif; color: #4ade80; display: none; margin: 0; }
+
+        @media (max-width: 768px) {
+            .overview-section { grid-template-columns: 1fr; gap: 30px; }
+            .hero-title-frame h1 { font-size: 1.8rem; }
+            .priority-item { gap: 20px; }
+            .priority-icon { width: 50px; height: 50px; }
+            .priority-badge, .priority-item span.priority-badge { width: 50px; height: 50px; font-size: 0.7rem; }
+            .nav-glass { padding: 10px 18px; gap: 14px; font-size: 0.62rem; letter-spacing: 1px; }
+            .nav-glass a { white-space: nowrap; }
+        }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 40px 0; }
+        .stat { background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 30px 20px; }
+        .stat b { display: block; font-family: 'Press Start 2P', cursive; font-size: 1.4rem; font-weight: normal; margin-bottom: 14px; }
+        .stat span { font-family: 'Open Sans', sans-serif; font-size: 0.9rem; opacity: 0.85; }
+
+        /* FLOW */
+        .flow { display: flex; align-items: stretch; gap: 10px; margin: 40px 0; flex-wrap: wrap; justify-content: center; }
+        .flow-step { flex: 1 1 140px; max-width: 170px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 14px; padding: 18px 14px; font-family: 'Open Sans', sans-serif; font-size: 0.85rem; text-align: center; }
+        .flow-step small { display: block; font-family: 'Press Start 2P', cursive; font-size: 0.55rem; opacity: 0.6; margin-bottom: 10px; }
+        .flow-arrow { align-self: center; opacity: 0.6; }
+        .glass-card ul.plain { font-family: 'Open Sans', sans-serif; padding-left: 20px; margin: 0; }
+        .glass-card ul.plain li { margin-bottom: 12px; }
+        .glass-card h3 { font-weight: normal; margin-top: 0; }
+        .note { font-family: 'Open Sans', sans-serif; font-size: 0.8rem; opacity: 0.65; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } .flow-arrow { display: none; } }
+        .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 40px 0; text-align: left; }
+        .gallery figure { margin: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px; }
+        .gallery img { width: 100%; border-radius: 10px; display: block; }
+        .gallery figcaption { font-family: 'Open Sans', sans-serif; font-size: 0.85rem; opacity: 0.85; margin-top: 12px; }
+        .gallery figcaption b { display: block; font-family: Georgia, serif; font-weight: normal; font-size: 1rem; margin-bottom: 4px; opacity: 1; }
+        @media (max-width: 768px) { .gallery { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-glass">
+            <a href="index.html">Home</a>
+            <a href="index.html#about">About</a>
+            <a href="index.html#cases">Case Studies</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <header class="hero-case">
+        <div class="hero-title-frame">
+            <h1>Tini Express Referral Program</h1>
+            <span>design &amp; launch</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="overview-section">
+            <div class="overview-item">
+                <h4>My role</h4>
+                <p>Growth &amp; Marketing Intern &mdash; flow, logic &amp; UX design</p>
+            </div>
+            <div class="overview-item">
+                <h4>Timeline</h4>
+                <p>Launched 19 Oct 2026</p>
+            </div>
+            <div class="overview-item">
+                <h4>Tools</h4>
+                <ul>
+                    <li>Figma</li>
+                    <li>PostHog</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="About-Project">
+            <h2>About Project</h2>
+            <div class="glass-card">
+                <p>Tini Express is a cross-border shopping service in Eswatini: customers order from South African stores, Tini Express ships the goods from its South African warehouse, and customers collect them in Eswatini. I planned and designed the company's first referral program &mdash; the reward logic, the sharing and sign-up flow, and how discounts are applied at checkout &mdash; and worked closely with the dev team to build, instrument and launch it in the web app.</p>
+            </div>
+        </section>
+
+        <section id="problem">
+            <h2>Problem Statement</h2>
+            <div class="glass-card">
+                <p>Most new customers already hear about Tini Express from friends and family, usually over WhatsApp &mdash; but that word of mouth was invisible and unrewarded. There was no way for a happy customer to bring someone in, no incentive for a new customer to place a first order, and no data on which recommendations actually turned into orders. Growth leaned on paid ads, while weekly sign-ups had flattened out.</p>
+            </div>
+        </section>
+
+        <section id="solution">
+            <h2>The Solution</h2>
+            <div class="glass-card">
+                <p>"Give 20% to Get 20%" &mdash; a two-sided referral program built into the web app. Every customer gets a personal invite link they can copy or share straight to WhatsApp. A friend who signs up with it gets 20% off their first delivery; once that first order is paid, the person who referred them earns 20% off delivery on an order of their choice (both capped at E100). Discounts live on the customer's account and are applied with a checkbox when they request a quote, so nobody has to remember or type a code.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Key Priorities</h2>
+            <div class="glass-card">
+                <ul class="priority-list">
+                    <li class="priority-item">
+                        <span class="priority-badge">P1</span>
+                        <span>Make sharing effortless on the channel customers already use &mdash; WhatsApp &mdash; with a personal link instead of a code to copy out by hand.</span>
+                    </li>
+                    <li class="priority-item">
+                        <span class="priority-badge">P2</span>
+                        <span>Reward real customers, not sign-ups: the referrer only earns once their friend completes a first order, which protects the business from abuse.</span>
+                    </li>
+                    <li class="priority-item">
+                        <span class="priority-badge">P3</span>
+                        <span>Keep discounts transparent and in the customer's control &mdash; visible on their account, applied by checkbox, and movable to another order if plans change.</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>Referral Flow</h2>
+            <div class="flow">
+                <div class="flow-step"><small>01</small>Customer opens "Refer a friend" and copies or shares their link to WhatsApp</div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step"><small>02</small>Friend opens the link and signs up &mdash; referral code already filled in</div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step"><small>03</small>Friend gets 20% off their first delivery</div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step"><small>04</small>Friend's first order is paid &rarr; referral becomes active</div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step"><small>05</small>Referrer earns 20% off delivery on an order of their choice</div>
+            </div>
+            <a href="assets/Referral/userflow.jpg?v=2" target="_blank" rel="noopener"><img src="assets/Referral/userflow.jpg?v=2" alt="Referral program user flow: from opening Refer a friend and sharing the link, through the friend's sign-up with the code pre-filled, to the referral activating once their first order is paid" class="diagram-img"></a>
+        </section>
+
+        <section>
+            <h2>Designing the Logic</h2>
+            <div class="glass-card">
+                <ul class="plain">
+                    <li><b>A reward that protects the margin.</b> The discount comes off the delivery fee from our South African warehouse, not the goods, and is capped at E100 &mdash; generous enough to motivate, without putting product margins at risk.</li>
+                    <li><b>Reserved, then redeemed.</b> A discount is reserved against an order as soon as the customer ticks it, and only redeemed once that order is paid &mdash; so a cancelled order releases the discount instead of burning it.</li>
+                    <li><b>Movable discounts, with honest consequences.</b> If the discount sits on an order that isn't paid yet, the customer can move it themselves. The confirmation spells out that the old order will be cancelled and how to get it back, so nothing happens by surprise. Anywhere else, the card says exactly which order holds the discount and links to WhatsApp support.</li>
+                    <li><b>Activity view.</b> Referrers can see who joined through their link and whether each one is "Signed up" or "Active" (first order paid), which answers the "did it work?" question before it reaches customer service.</li>
+                    <li><b>Measurable from day one.</b> I defined tracking for every step &mdash; opening the referral modal, copying and sharing the link, sign-ups, reservations, redemptions and activations &mdash; so the funnel could be read in PostHog from launch.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2 id="final-designs">Final Designs</h2>
+            <div class="gallery">
+                <figure><img src="assets/Referral/01-menu-refer-a-friend.jpg" alt="Entry point" loading="lazy"><figcaption><b>Entry point</b>"Refer a friend" sits in the main menu next to Orders and Delivery Fees, so the program is always one tap away.</figcaption></figure>
+                <figure><img src="assets/Referral/02-referral-refer-tab.jpg" alt="Refer tab" loading="lazy"><figcaption><b>Refer tab</b>"Give 20% to Get 20%" up top, three plain-language steps, then the invite link with one-tap Copy and WhatsApp sharing.</figcaption></figure>
+                <figure><img src="assets/Referral/03-referral-activity-tab.jpg" alt="Referral activity tab" loading="lazy"><figcaption><b>Referral activity tab</b>Each referred friend with a clear status: "Signed up", or "Active" once their first order is paid.</figcaption></figure>
+                <figure><img src="assets/Referral/04-signup-autofilled-code.jpg" alt="Friend's sign-up" loading="lazy"><figcaption><b>Friend's sign-up</b>Opening an invite link pre-fills the referral code, so the friend has nothing to type.</figcaption></figure>
+                <figure><img src="assets/Referral/05-checkout-first-order-discount.jpg" alt="Checkout card: first order discount" loading="lazy"><figcaption><b>Checkout card: first order discount</b>The friend's welcome discount, pre-ticked on the quote screen, with the E100 cap stated up front.</figcaption></figure>
+                <figure><img src="assets/Referral/06-checkout-20-discount.jpg" alt="Checkout card: referrer reward" loading="lazy"><figcaption><b>Checkout card: referrer reward</b>Earned rewards stack up, and the card says how many are available. One tick applies one.</figcaption></figure>
+                <figure><img src="assets/Referral/07-checkout-discount-on-other-order.jpg" alt="Checkout card: already applied" loading="lazy"><figcaption><b>Checkout card: already applied</b>If the discount is already on another order, the card names that order and offers WhatsApp help instead of hiding the discount.</figcaption></figure>
+                <figure><img src="assets/Referral/08-order-active-discount.jpg" alt="Active discount on an order" loading="lazy"><figcaption><b>Active discount on an order</b>My Orders shows a "20% off delivery applied" tag, and a cancelled order records where its discount moved.</figcaption></figure>
+                <figure><img src="assets/Referral/09-move-discount-popup.jpg" alt="Move discount" loading="lazy"><figcaption><b>Move discount</b>Moving a discount off an unpaid order cancels that order, so the confirmation says so plainly and offers "No, keep full delivery".</figcaption></figure>
+            </div>
+        </section>
+
+        <a href="Referral-prototype.html" target="_blank" rel="noopener" class="btn-prototype">
+            VIEW PROTOTYPE
+        </a>
+
+        <section>
+            <h2>Launch &amp; Results</h2>
+            <p style="font-family:'Open Sans',sans-serif;opacity:0.85;">The program went live in the app on 19 October 2026 and was pushed in person at the Family Fun Day on 31 October, where visitors signed up through their own referral link at our stall. In its first three and a half weeks:</p>
+            <div class="stats-grid">
+                <div class="stat"><b>44</b><span>new accounts created through referral links</span></div>
+                <div class="stat"><b>~19&rarr;52</b><span>average weekly sign-ups, the 3 weeks before vs. the 4 weeks after launch</span></div>
+                <div class="stat"><b>61%</b><span>of sign-ups came through a referral in the most recent week</span></div>
+                <div class="stat"><b>100%</b><span>of tracked link shares went out on WhatsApp</span></div>
+                <div class="stat"><b>8</b><span>referral sign-ups on Family Fun Day alone</span></div>
+                <div class="stat"><b>7</b><span>discounts redeemed on paid orders (5 welcome, 2 referrer rewards)</span></div>
+            </div>
+            <p class="note">Data from PostHog, 19 Oct &ndash; 12 Nov 2026. The sign-up increase also overlaps with the Family Fun Day activation and other marketing, so it isn't attributed to referrals alone.</p>
+        </section>
+
+        <section id="Final Thoughts">
+            <h2>What I Learned</h2>
+            <div class="glass-card">
+                <p>The data confirmed the bet behind the design: every single tracked share went out on WhatsApp, so making that one channel frictionless mattered more than offering many. It also showed where to go next. Most referred friends sign up, but far fewer have completed a first order yet, so the next opportunity is nudging them from welcome discount to first order. About as many people dismissed the home banner as opened the referral page, which tells me its timing and placement need work. Designing the reward rules taught me that, in a referral program, the logic <i>is</i> the user experience &mdash; customers trust the program only when they can see exactly what they've earned and when.</p>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Get in touch</h2>
+            <div class="glass-card" style="max-width: 600px; margin: 0 auto 80px; text-align: center;">
+                <form id="my-form" action="https://formspree.io/f/mykgaqdk" method="POST">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" name="name" placeholder="Type here.." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your email *</label>
+                        <input type="email" name="email" placeholder="Type here.." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your message *</label>
+                        <textarea name="message" placeholder="Type here.." required style="height: 120px; resize: none;"></textarea>
+                    </div>
+                    <input type="hidden" name="_subject" value="New Portfolio Message">
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
+                        <p id="form-status">Thank you, message sent!</p>
+                        <button id="submit-btn" type="submit" class="btn-pill">Send</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <a href="index.html" style="color: white; text-decoration: none; font-size: 0.9rem; display: block; margin: 60px 0; font-family: 'Open Sans', sans-serif;">← Back to home</a>
+    </div>
+
+    <script>
+        const form = document.getElementById("my-form");
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const status = document.getElementById("form-status");
+            const btn = document.getElementById("submit-btn");
+            const data = new FormData(event.target);
+            btn.disabled = true;
+            btn.innerHTML = "Sending...";
+            fetch(event.target.action, {
+                method: form.method,
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            }).then(response => {
+                if (response.ok) {
+                    status.style.display = "block";
+                    form.reset();
+                    btn.disabled = false;
+                    btn.innerHTML = "Send";
+                    setTimeout(() => { status.style.display = "none"; }, 5000);
+                } else {
+                    alert("Oops! There was a problem submitting your form");
+                    btn.disabled = false;
+                    btn.innerHTML = "Send";
+                }
+            }).catch(error => {
+                alert("Oops! There was a problem submitting your form");
+                btn.disabled = false;
+                btn.innerHTML = "Send";
+            });
+        }
+        form.addEventListener("submit", handleSubmit);
+    </script>
+</body>
+
+</html>
+
+
+

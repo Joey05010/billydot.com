@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="assets/Logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Study - Ekuphileni app, Prescription Order flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-color: #ffffff;
+            --accent-glow: rgba(255, 255, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('assets/bg.png') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* NAVIGATION */
+        nav { position: sticky; top: 20px; z-index: 1000; display: flex; justify-content: center; padding: 0 20px; }
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 12px 60px;
+            display: flex;
+            gap: 60px;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        .nav-glass a { color: white; text-decoration: none; transition: 0.3s; }
+        section { scroll-margin-top: 90px; }
+        .nav-glass a:hover { opacity: 0.6; }
+
+        /* HERO SECTION */
+        .hero-case {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: url('assets/Phile/image1.png') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            margin-bottom: 60px;
+        }
+
+        .hero-title-frame {
+            background: rgb(11 87 30 / 28%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            padding: 25px 50px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .hero-title-frame h1 { margin: 0; font-size: 2.5rem; font-weight: normal; }
+        .hero-title-frame span { font-family: 'Press Start 2P', cursive; font-size: 1.1rem; display: block; margin-top: 12px; color: rgba(255,255,255,0.8); }
+
+        /* PROJECT OVERVIEW */
+        .overview-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            padding: 60px 0;
+            border-bottom: 1px solid var(--glass-border);
+            margin: 0 auto 60px auto;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .overview-item h4 { font-size: 1.3rem; margin-bottom: 10px; font-weight: normal; }
+        .overview-item p, .overview-item ul { font-family: 'Open Sans', sans-serif; opacity: 0.8; font-size: 0.95rem; margin: 0; padding: 0; list-style: none; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; text-align: center; }
+
+        /* CONTENT COMPONENTS */
+        h2 { margin: 80px 0 30px; font-weight: normal; font-size: 2rem; border-bottom: 1px solid var(--glass-border); display: inline-block; padding-bottom: 10px; }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; margin: 40px 0; text-align: left; }
+        .diagram-img { width: 100%; border-radius: 12px; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin: 40px 0; }
+
+        /* KEY PRIORITIES - FIXED ALIGNMENT */
+        .priority-list { list-style: none; padding: 0; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .priority-item { 
+            display: flex; 
+            align-items: center; /* Vertically centers icon with text */
+            gap: 30px; 
+            margin-bottom: 30px; 
+            font-family: 'Open Sans', sans-serif; 
+            max-width: 700px; 
+            width: 100%;
+            text-align: left; 
+        }
+        .priority-icon { 
+            width: 65px; 
+            height: 65px; 
+            flex-shrink: 0; /* Prevents icon from distorting */
+            object-fit: contain;
+        }
+        .priority-item span { line-height: 1.5; font-size: 1rem; opacity: 0.9; }
+        .priority-badge {
+            width: 65px; height: 65px; flex-shrink: 0; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: #22A35A; color: #ffffff;
+            font-family: 'Press Start 2P', cursive; font-size: 0.85rem;
+            box-shadow: 0 0 18px #22A35A59;
+        }
+        .priority-item span.priority-badge { opacity: 1; line-height: 1; font-size: 0.85rem; }
+
+        /* PROTOTYPE BUTTON */
+        .btn-prototype {
+            display: inline-block;
+            margin: 40px 0;
+            padding: 18px 45px;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            border-radius: 5px;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        .btn-prototype:hover { transform: translateY(-3px); box-shadow: 0 5px 25px rgba(255,255,255,0.4); }
+
+        /* CONTACT FORM */
+        .form-group { margin-bottom: 25px; font-family: 'Open Sans', sans-serif; text-align: left;}
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; opacity: 0.9; }
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus, textarea:focus { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.1); }
+        .btn-pill {
+            padding: 10px 35px;
+            background: transparent;
+            border: 1px solid white;
+            border-radius: 25px;
+            color: white;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-pill:hover { background: white; color: black; }
+        #form-status { font-family: 'Open Sans', sans-serif; color: #4ade80; display: none; margin: 0; }
+
+        @media (max-width: 768px) {
+            .overview-section { grid-template-columns: 1fr; gap: 30px; }
+            .hero-title-frame h1 { font-size: 1.8rem; }
+            .priority-item { gap: 20px; }
+            .priority-icon { width: 50px; height: 50px; }
+            .priority-badge, .priority-item span.priority-badge { width: 50px; height: 50px; font-size: 0.7rem; }
+            .nav-glass { padding: 10px 18px; gap: 14px; font-size: 0.62rem; letter-spacing: 1px; }
+            .nav-glass a { white-space: nowrap; }
+        }
+        .img-caption { font-family: 'Open Sans', sans-serif; font-size: 0.92rem; line-height: 1.6; opacity: 0.85; max-width: 720px; margin: -20px auto 20px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-glass">
+            <a href="index.html">Home</a>
+            <a href="index.html#about">About</a>
+            <a href="index.html#cases">Case Studies</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <header class="hero-case">
+        <div class="hero-title-frame">
+            <h1>Ekuphileni app, Prescription</h1>
+            <span>order flow</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="overview-section">
+            <div class="overview-item">
+                <h4>My role</h4>
+                <p>UX Designer</p>
+            </div>
+            <div class="overview-item">
+                <h4>Duration</h4>
+                <p>4 weeks</p>
+            </div>
+            <div class="overview-item">
+                <h4>Tools</h4>
+                <ul>
+                    <li>Figma</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="About-Project">
+            <h2>About Project</h2>
+            <div class="glass-card">
+                <p>This project focuses on designing the prescription ordering flow for the Ekuphileni Clinic app. Whilst the app also allows patients to book doctor appointments and schedule house calls, the primary goal of this project was to create a simple, intuitive and seamless experience for ordering and paying for prescriptions, ensuring that even patients who are severely ill can order and pay for their medication from home, then simply collect it once it is ready. The project was taken to a clickable, high-fidelity prototype; the app itself was not built.</p>
+                <p>I worked as the UX designer alongside a UI designer. The UI designer owned the layout, colour and typography. I designed the flows and made sure the interface matched the abilities of the people the app is for &mdash; elderly and ill patients &mdash; so that every step stays easy to read, understand and complete.</p>
+            </div>
+        </section>
+
+        <section id="problem">
+            <h2>Problem Statement</h2>
+            <div class="glass-card">
+                <p> Severely ill patients struggle to access timely healthcare due to limited mobility and overburdened hospital systems. Many cannot leave their homes, and when they do, they often face unavailable doctors or packed schedules. This leaves patients without essential treatment and creates a pressing demand for more accessible, efficient, and reliable medical care solutions.</p>
+            </div>
+        </section>
+
+        <section id="solution">
+            <h2>The Solution</h2>
+            <div class="glass-card">
+                <p>Patients need a reliable way to get their medication without long, uncertain waits at the clinic, especially when they are severely ill. Our solution focuses on designing a seamless prescription ordering flow within the Ekuphileni Clinic app. This flow allows patients to easily order and pay for their prescriptions from home, then collect them at the clinic once they are ready, turning a long wait into a quick pickup. For patients who can't leave home, a family member or caregiver can collect the order on their behalf. While the app also supports booking appointments and scheduling home visits, the primary emphasis of this project is ensuring that the prescription ordering experience is fast, clear, and convenient for patients who need timely access to their medication.</p>
+            </div>
+        </section>
+
+        <section id="research">
+            <h2>Research</h2>
+            <div class="glass-card">
+                <p>We ran a survey with people at the clinic to understand the patients the app would serve. It kept the design focused on the people who need it most: elderly and ill patients.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Design Process</h2>
+            <img src="assets/Onboarding/design process.png" alt="Design Process" class="diagram-img">
+            <p class="img-caption">I followed the Double Diamond: discover and define the problem first, then develop and deliver the solution.</p>
+        </section>
+
+        <section>
+            <h2>Key Priorities</h2>
+            <div class="glass-card">
+                <ul class="priority-list">
+                    <li class="priority-item">
+                        <span class="priority-badge">P1</span>
+                        <span>Design a purchasing flow that users can seamlessly navigate through without friction and successfully order their prescriptions.</span>
+                    </li>
+                    <li class="priority-item">
+                        <span class="priority-badge">P2</span>
+                        <span>Match the interface to the abilities of elderly and ill patients, so every step is easy to read, understand and complete.</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>User Personas</h2>
+            <img src="assets/Phile/Persona 1.png" alt="Persona" class="diagram-img">
+            <img src="assets/Phile/Persona 2.png" alt="Persona" class="diagram-img">
+            <img src="assets/Phile/Persona 3.png" alt="Persona" class="diagram-img">
+            <p class="img-caption">Three personas covered the people the app serves: Thabo, a tech-confident patient in a remote town; Grace, 67, who finds travel painful and has low-to-medium comfort with technology; and Samuel, who manages his mother's care around work. Grace set the bar: if the flow worked for her, it worked for everyone.</p>
+        </section>
+
+        <section>
+            <h2>User Flow</h2>
+            <img src="assets/Phile/Userflow.png" alt="User Flow" class="diagram-img">
+            <p class="img-caption">From the pharmacy, patients choose prescription or non-prescription medicine. Prescriptions add patient details and the prescribing doctor before picking products; both paths then meet at the same payment and confirmation steps.</p>
+        </section>
+
+        <section>
+            <h2>Wireframes</h2>
+            <img src="assets/Phile/wireframes.png" alt="Wireframe sketches" class="diagram-img">
+            <p class="img-caption">Quick hand sketches of the key screens: the starting choice, product listings, patient details and payment method.</p>
+        </section>
+
+        <section>
+            <h2>Final Hi-Fi Designs</h2>
+            <img src="assets/Phile/P Flow.png" alt="Prescription flow designs" class="diagram-img">
+            <img src="assets/Phile/NonP Flow.png" alt="Non-prescription flow designs" class="diagram-img">
+            <p class="img-caption">The final prescription and non-prescription flows: one clear choice to start, a searchable product list, an order summary before payment, and four ways to pay, including cash and insurance. The confirmation screen gives clear pickup instructions and the clinic's phone number.</p>
+        </section>
+
+        <a href="Ekuphileni-prototype.html" target="_blank" rel="noopener" class="btn-prototype">
+            VIEW PROTOTYPE
+        </a>
+        <section id="Final Thoughts">
+            <h2>Final Thoughts</h2>
+            <div class="glass-card">
+                <p>Designing for elderly and ill patients taught me that accessibility isn't a layer you add at the end; it shapes the flow itself. When someone is managing pain, fatigue or anxiety, every extra step or unclear label costs them more. Working alongside the UI designer, my job was to make sure each step stayed easy to read, understand and complete for someone like Grace, not just for a confident user like Thabo.</p>
+                <p><b>What I'd do differently:</b> the project ended at a clickable prototype. I'd want to build it fully and test it in the field with real patients at the clinic, to see how the flow holds up for people who are unwell, in a hurry, or less used to their phones.</p>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Get in touch</h2>
+            <div class="glass-card" style="max-width: 600px; margin: 0 auto 80px; text-align: center;">
+                <form id="my-form" action="https://formspree.io/f/mykgaqdk" method="POST">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" name="name" placeholder="Type here.." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your email *</label>
+                        <input type="email" name="email" placeholder="Type here.." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your message *</label>
+                        <textarea name="message" placeholder="Type here.." required style="height: 120px; resize: none;"></textarea>
+                    </div>
+                    <input type="hidden" name="_subject" value="New Portfolio Message">
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 15px;">
+                        <p id="form-status">Thank you, message sent!</p>
+                        <button id="submit-btn" type="submit" class="btn-pill">Send</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <a href="index.html" style="color: white; text-decoration: none; font-size: 0.9rem; display: block; margin: 60px 0; font-family: 'Open Sans', sans-serif;">← Back to home</a>
+    </div>
+
+    <script>
+        const form = document.getElementById("my-form");
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const status = document.getElementById("form-status");
+            const btn = document.getElementById("submit-btn");
+            const data = new FormData(event.target);
+            btn.disabled = true;
+            btn.innerHTML = "Sending...";
+            fetch(event.target.action, {
+                method: form.method,
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            }).then(response => {
+                if (response.ok) {
+                    status.style.display = "block";
+                    form.reset();
+                    btn.disabled = false;
+                    btn.innerHTML = "Send";
+                    setTimeout(() => { status.style.display = "none"; }, 5000);
+                } else {
+                    alert("Oops! There was a problem submitting your form");
+                    btn.disabled = false;
+                    btn.innerHTML = "Send";
+                }
+            }).catch(error => {
+                alert("Oops! There was a problem submitting your form");
+                btn.disabled = false;
+                btn.innerHTML = "Send";
+            });
+        }
+        form.addEventListener("submit", handleSubmit);
+    </script>
+</body>
+
+</html>
+
+
+

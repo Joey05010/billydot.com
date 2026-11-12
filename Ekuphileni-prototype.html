@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="assets/Logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekuphileni Prototype</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Open+Sans:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text: #ffffff;
+            --accent: #22A35A;
+            --hint: #2E9E4F;
+            --hint-fill: rgba(46, 158, 79, 0.22);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Open Sans', sans-serif;
+            color: var(--text);
+            background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+                        url('assets/bg.png') no-repeat center center fixed;
+            background-size: cover;
+        }
+        a { color: inherit; }
+
+        .top { display: flex; justify-content: space-between; align-items: center; max-width: 1040px; margin: 0 auto; padding: 20px 16px 0; font-size: 0.85rem; gap: 12px; }
+        .top a { text-decoration: none; opacity: 0.85; }
+        .top a:hover { opacity: 1; }
+        .hint-toggle { background: transparent; border: 1px solid var(--glass-border); color: var(--text); border-radius: 20px; padding: 6px 14px; font: inherit; cursor: pointer; }
+        .hint-toggle[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+
+        .layout { display: grid; grid-template-columns: 1fr 380px; gap: 48px; max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; align-items: start; }
+
+        /* PHONE */
+        .phone-wrap { display: flex; justify-content: center; }
+        .phone {
+            width: min(380px, 100%);
+            background: #121214;
+            border-radius: 52px;
+            padding: 12px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.45), inset 0 0 0 2px #46464c;
+        }
+        .screen { position: relative; border-radius: 40px; overflow: hidden; aspect-ratio: 393 / 852; background: #F3F2EC; }
+        .scroller { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .scroller::-webkit-scrollbar { display: none; }
+        .stage { position: relative; width: 393px; transform-origin: 0 0; }
+        .stage > img { display: block; width: 393px; height: auto; user-select: none; -webkit-user-drag: none; }
+
+        /* Filled-in values */
+        .fill { position: absolute; display: flex; align-items: center; padding-left: 9px; font-family: 'Inter', system-ui, sans-serif; font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; pointer-events: none; }
+        .fill.empty { visibility: hidden; }
+        .patch { position: absolute; pointer-events: none; background-repeat: no-repeat; }
+        .patch.off { display: none; }
+        .fill.area { align-items: flex-start; padding: 9px 10px; white-space: normal; line-height: 1.45; }
+        .digit { position: absolute; display: flex; align-items: center; justify-content: center; font-family: 'Inter', system-ui, sans-serif; font-weight: 600; font-size: 26px; color: #fff; pointer-events: none; }
+        .digit.dot { font-size: 40px; line-height: 0; }
+        .digit:empty { display: none; }
+        .digit.pop, .tick.pop { animation: pop .18s ease-out; }
+        @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .tick { position: absolute; pointer-events: none; }
+        .tick.off { display: none; }
+        .caret::after { content: ''; display: inline-block; width: 1.5px; height: 18px; background: #fff; margin-left: 1px; animation: blink .8s steps(1) infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Buttons that unlock once fields are filled */
+        .btn-on {
+            position: absolute; display: flex; align-items: center; justify-content: center;
+            background: #0760DE; border: 3px solid #1069E4; border-radius: 8px;
+            font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 20px; color: #fff;
+            pointer-events: none; animation: pop .2s ease-out;
+        }
+
+        /* Fingerprint scan */
+        .scan-ring { position: absolute; border-radius: 50%; pointer-events: none; opacity: 0; }
+        .scan-ring.on { animation: scan 1.1s ease-out; }
+        @keyframes scan {
+            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(125, 211, 252, .7), inset 0 0 40px rgba(125, 211, 252, .35); }
+            100% { opacity: 1; box-shadow: 0 0 0 26px rgba(125, 211, 252, 0), inset 0 0 90px rgba(125, 211, 252, .55); }
+        }
+
+        /* Tap areas */
+        .hotspot { position: absolute; border-radius: 10px; cursor: pointer; background: transparent; border: 0; padding: 0; }
+        .hotspot:focus-visible { outline: 3px solid var(--hint); outline-offset: 2px; }
+        .hotspot.next { box-shadow: 0 0 0 2px var(--hint); animation: guide 1.6s ease-in-out infinite; }
+        @keyframes guide { 50% { box-shadow: 0 0 0 5px rgba(46, 158, 79, .3); } }
+        .show-hints .hotspot, .flash .hotspot, .hotspot.need {
+            background: var(--hint-fill);
+            box-shadow: 0 0 0 2px var(--hint);
+        }
+        .flash .hotspot, .hotspot.need { animation: pulse .7s ease 2; }
+        @keyframes pulse { 50% { background: rgba(46, 158, 79, 0.42); } }
+
+        .toast {
+            position: absolute; left: 50%; bottom: 6%; transform: translate(-50%, 20px);
+            background: rgba(10, 10, 20, 0.92); color: #fff; padding: 10px 18px; border-radius: 22px;
+            font-size: 0.82rem; opacity: 0; transition: .25s ease; z-index: 6; pointer-events: none;
+            max-width: 88%; text-align: center;
+        }
+        .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+        .scroll-chip {
+            position: absolute; right: 4%; bottom: 2.5%;
+            background: #283A8C; color: #fff; font-family: 'Inter', sans-serif; font-weight: 600;
+            font-size: 0.75rem; padding: 7px 14px; border-radius: 20px; z-index: 5; pointer-events: none;
+            transition: opacity .25s; opacity: 0;
+        }
+        .scroll-chip.on { opacity: 1; animation: nudge 1.4s ease-in-out infinite; }
+        @keyframes nudge { 50% { transform: translateY(4px); } }
+
+        .scene {
+            position: absolute; inset: 0; z-index: 8;
+            display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            padding: 0 28px; gap: 18px;
+            background: linear-gradient(180deg, #F3F2EC 0%, #F3F2EC 35%, #CFE3BD 70%, #7AB051 100%);
+            color: #1a1a1a;
+        }
+        .scene.on { display: flex; }
+        .scene .tag { font-family: 'Press Start 2P', cursive; font-size: 0.6rem; letter-spacing: 1px; opacity: 0.85; }
+        .scene h3 { margin: 0; font-family: Georgia, serif; font-weight: normal; font-size: 1.5rem; line-height: 1.3; }
+        .scene p { margin: 0; font-size: 0.95rem; line-height: 1.5; opacity: 0.9; }
+        .scene button {
+            margin-top: 6px; background: #283A8C; color: #fff; border: 0; border-radius: 22px;
+            padding: 14px 28px; font-weight: 700; letter-spacing: 1px; font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif;
+        }
+
+        /* SIDE PANEL */
+        .panel {
+            background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px;
+            position: sticky; top: 24px;
+        }
+        .panel h1 { font-family: Georgia, serif; font-weight: normal; font-size: 1.6rem; margin: 0 0 6px; }
+        .panel .sub { opacity: 0.75; font-size: 0.85rem; margin: 0 0 22px; }
+        .now { border-left: 3px solid var(--accent); padding-left: 14px; margin-bottom: 22px; }
+        .now small { display: block; font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: #7EDC9C; margin-bottom: 4px; }
+        .now b { display: block; font-family: Georgia, serif; font-weight: normal; font-size: 1.15rem; margin-bottom: 4px; }
+        .now span { font-size: 0.9rem; opacity: 0.85; line-height: 1.5; display: block; }
+        .now em { display: block; margin-top: 10px; font-style: normal; font-size: 0.8rem; color: #7EDC9C; }
+        .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+        .steps li { counter-increment: s; }
+        .steps li.group { counter-increment: none; font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.6; padding: 12px 8px 4px; }
+        .steps button {
+            width: 100%; text-align: left; background: transparent; border: 0; color: var(--text);
+            font: inherit; font-size: 0.85rem; padding: 6px 8px; border-radius: 8px; cursor: pointer; opacity: 0.7;
+            display: flex; gap: 10px; align-items: center;
+        }
+        .steps button::before { content: counter(s); width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
+        .steps button:hover { opacity: 1; background: rgba(255,255,255,0.06); }
+        .steps button[aria-current="step"] { opacity: 1; background: rgba(34, 163, 90, 0.22); }
+        .steps button[aria-current="step"]::before { background: var(--accent); border-color: var(--accent); }
+        .restart { margin-top: 18px; background: transparent; border: 1px solid white; color: white; border-radius: 25px; padding: 9px 26px; font: inherit; font-weight: 600; cursor: pointer; }
+        .restart:hover { background: white; color: black; }
+
+        @media (max-width: 860px) {
+            .layout { grid-template-columns: 1fr; gap: 24px; }
+            .panel { position: static; }
+            .steps { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top">
+        <a href="Phile.html">&larr; Back to case study</a>
+        <button class="hint-toggle" id="hintToggle" aria-pressed="false">Show tap areas</button>
+    </div>
+
+    <main class="layout">
+        <div class="phone-wrap">
+            <div class="phone">
+                <div class="screen" id="screen">
+                    <div class="scroller" id="scroller">
+                        <div id="sizer"><div class="stage" id="stage"></div></div>
+                    </div>
+                    <div class="scroll-chip" id="scrollChip">Scroll &darr;</div>
+                    <div class="toast" id="toast"></div>
+                    <div class="scene" id="scene" role="dialog" aria-live="polite">
+                        <div class="tag" id="sceneTag"></div>
+                        <h3 id="sceneTitle"></h3>
+                        <p id="sceneText"></p>
+                        <button id="sceneBtn"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="panel">
+            <h1>Ekuphileni pharmacy</h1>
+            <p class="sub">Clinic app &middot; clickable prototype of ordering medication for pickup. Tap a field to fill it in, tap buttons to move on, or jump to any step.</p>
+            <div class="now" id="now"><small></small><b></b><span></span><em></em></div>
+            <ol class="steps" id="steps"></ol>
+            <button class="restart" id="restart">Restart</button>
+        </aside>
+    </main>
+
+    <script>
+        const SCREENS = {"start": {"img": "01-order-medication", "step": "start", "title": "Order your medication", "note": "One clear choice to begin: non-prescription or prescription medicine.", "task": "Tap Non-Prescriptions.", "phases": {"nonp": {"next": "Non-Prescriptions", "note": "One clear choice to begin: non-prescription or prescription medicine.", "task": "Start with a non-prescription order: tap Non-Prescriptions."}, "rx": {"next": "Prescriptions", "note": "Back at the start, this time for a prescription medicine.", "task": "Tap Prescriptions."}}, "hot": [{"box": [62, 408, 331, 454], "go": "nonp-list", "label": "Non-Prescriptions"}, {"box": [63, 495, 332, 541], "go": "rx-patient", "label": "Prescriptions"}, {"box": [18, 82, 62, 120], "toast": "This screen isn't in the prototype yet", "label": "Back"}, {"box": [326, 84, 366, 116], "toast": "This screen isn't in the prototype yet", "label": "More options"}], "h": 852}, "nonp-list": {"img": "02-nonp-list", "step": "nonp-list", "title": "Browse medicines", "note": "A searchable list with a short, plain description of each medicine, so patients find what they need quickly.", "task": "Tap Ibuprofen 200g.", "hot": [{"box": [31, 212, 364, 346], "go": "nonp-product", "next": true, "label": "Ibuprofen 200g"}, {"box": [31, 364, 364, 498], "toast": "This demo follows the Ibuprofen order", "label": "Cough Syrup"}, {"box": [31, 516, 364, 650], "toast": "This demo follows the Ibuprofen order", "label": "Antacid Tablets"}, {"box": [31, 668, 364, 802], "toast": "This demo follows the Ibuprofen order", "label": "First Aid Cream"}, {"box": [31, 96, 364, 137], "toast": "Search isn't part of this prototype yet", "label": "Search"}, {"box": [31, 146, 364, 187], "toast": "Filters aren't part of this prototype yet", "label": "Filter"}, {"box": [330, 40, 376, 84], "toast": "Your basket is empty", "label": "Basket"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 852}, "nonp-product": {"img": "03-nonp-product", "step": "nonp-product", "title": "Product details", "note": "Instructions of use and warnings sit right on the product page, written plainly.", "task": "Tap Add to basket.", "hot": [{"box": [138, 832, 260, 860], "go": "nonp-added", "swap": true, "next": true, "label": "Add to basket"}, {"box": [330, 40, 376, 84], "toast": "Your basket is empty", "label": "Basket"}, {"box": [40, 266, 74, 300], "toast": "This screen isn't in the prototype yet", "label": "Previous photo"}, {"box": [318, 266, 352, 300], "toast": "This screen isn't in the prototype yet", "label": "Next photo"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 922}, "nonp-added": {"img": "04-nonp-added", "step": "nonp-added", "title": "Added to basket", "note": "Adding the item swaps the button for a quantity control, and the basket icon shows the item count.", "task": "Tap the basket at the top right to check out.", "hot": [{"box": [330, 40, 378, 86], "go": "patient", "next": true, "label": "Basket"}, {"box": [134, 829, 171, 866], "toast": "Quantity stays at 1 in this prototype", "label": "Decrease quantity"}, {"box": [228, 829, 265, 866], "toast": "Quantity stays at 1 in this prototype", "label": "Increase quantity"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 922}, "patient": {"img": "05-patient-details", "step": "patient", "title": "Patient details", "note": "Only what is needed for pickup: name, phone number and address, with email optional. The order summary sits right below.", "task": "Tap the fields to fill them in, then tap Next.", "fields": [{"id": "pt-name", "kind": "text", "box": [43, 142, 351, 192], "value": "Melusi Dlamini", "color": "#111111", "size": 14, "radius": 11, "inset": 3, "pad": 7, "bg": "#ffffff"}, {"id": "pt-phone", "kind": "text", "box": [43, 208, 351, 258], "value": "+268 7620 3689", "color": "#111111", "size": 14, "radius": 11, "inset": 3, "pad": 7, "bg": "#ffffff"}, {"id": "pt-address", "kind": "text", "box": [43, 275, 351, 325], "value": "Mona flats, Gwamile street, Mbabane", "color": "#111111", "size": 14, "radius": 11, "inset": 3, "pad": 7, "bg": "#ffffff"}, {"id": "pt-email", "kind": "text", "box": [43, 370, 351, 420], "value": "melusidlamini@gmail.com", "color": "#111111", "size": 14, "radius": 11, "inset": 3, "pad": 7, "bg": "#ffffff"}], "hot": [{"box": [41, 706, 353, 737], "go": "confirm", "fill": ["pt-name", "pt-phone", "pt-address", "pt-email"], "next": true, "label": "Next"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 852}, "confirm": {"img": "06-order-confirmation", "step": "confirm", "title": "Review and pay", "note": "Everything is reviewed on one screen. Confirm order stays disabled until a payment method is chosen, with four options including cash and insurance.", "task": "Choose a payment method, then tap Confirm order.", "fields": [{"id": "confirm-pay-0", "kind": "radio", "group": "pay", "value": "Credit/Debit card", "dot": [68, 450, 86, 468], "patch": {"img": "07-order-confirmation-selected", "src": [68, 492]}}, {"id": "confirm-pay-1", "kind": "radio", "group": "pay", "value": "Insurance coverage", "dot": [68, 492, 86, 510], "patch": {"img": "07-order-confirmation-selected", "src": [68, 492]}}, {"id": "confirm-pay-2", "kind": "radio", "group": "pay", "value": "Cash payment (Pay at pickup)", "dot": [68, 534, 86, 552], "patch": {"img": "07-order-confirmation-selected", "src": [68, 492]}}, {"id": "confirm-pay-3", "kind": "radio", "group": "pay", "value": "eWallet", "dot": [68, 576, 86, 594], "patch": {"img": "07-order-confirmation-selected", "src": [68, 492]}}], "hot": [{"box": [62, 445, 331, 475], "choose": {"group": "pay", "value": "Credit/Debit card"}, "label": "Credit/Debit card"}, {"box": [62, 487, 331, 517], "choose": {"group": "pay", "value": "Insurance coverage"}, "label": "Insurance coverage"}, {"box": [62, 529, 331, 559], "choose": {"group": "pay", "value": "Cash payment (Pay at pickup)"}, "label": "Cash payment (Pay at pickup)"}, {"box": [62, 571, 331, 601], "choose": {"group": "pay", "value": "eWallet"}, "label": "eWallet"}, {"box": [62, 812, 331, 838], "go": "confirmed", "needs": ["pay"], "needsMsg": "Choose a payment method first", "patch": {"img": "07-order-confirmation-selected", "src": [62, 812]}, "label": "Confirm order"}, {"box": [282, 1042, 302, 1062], "toast": "Quantity stays at 1 in this prototype", "label": "Decrease quantity"}, {"box": [327, 1042, 347, 1062], "toast": "Quantity stays at 1 in this prototype", "label": "Increase quantity"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 1268}, "confirmed": {"img": "08-order-confirmed", "step": "confirmed", "title": "Order confirmed", "note": "Clear pickup instructions, the order details, and the clinic's phone number for questions.", "task": "Tap Return home.", "labels": [{"box": [62, 575, 230, 595], "bg": "#ffffff", "key": "pay", "def": "Insurance coverage", "color": "#111111", "size": 10.5}], "hot": [{"box": [40, 626, 158, 643], "toast": "Receipt downloaded", "label": "Download receipt"}, {"box": [208, 626, 328, 643], "toast": "Receipt sent to your email", "label": "Email receipt"}, {"box": [41, 855, 353, 884], "scene": "bridge", "next": true, "label": "Return home"}], "h": 941}, "rx-patient": {"img": "09-rx-patient-empty", "step": "rx-patient", "title": "Patient details", "note": "Prescription orders start with the patient, since the prescription belongs to them. Next unlocks once the required fields are in; email stays optional.", "task": "Tap the fields to fill them in, then tap Next.", "fields": [{"id": "rx-name", "kind": "text", "box": [43, 142, 351, 192], "value": "Melusi Dlamini", "color": "#111111", "size": 14, "radius": 11, "inset": 3, "pad": 7, "bg": "#ffffff"}, {"id": "rx-phone", "kind": "text", "box": [43, 208, 351, 258], "value": "+268 7620 3689", "color": "#111111", "size": 14, "radius": 11, "inset": 3, "pad": 7, "bg": "#ffffff"}, {"id": "rx-address", "kind": "text", "box": [43, 275, 351, 325], "value": "Mona flats, Gwamile street, Mbabane", "color": "#111111", "size": 14, "radius": 11, "inset": 3, "pad": 7, "bg": "#ffffff"}, {"id": "rx-email", "kind": "text", "box": [43, 370, 351, 420], "value": "melusidlamini@gmail.com", "color": "#111111", "size": 14, "radius": 11, "inset": 3, "pad": 7, "bg": "#ffffff"}], "hot": [{"box": [43, 464, 351, 489], "go": "rx-doctor", "needs": ["rx-name", "rx-phone", "rx-address"], "fill": ["rx-name", "rx-phone", "rx-address", "rx-email"], "needsMsg": "Fill in the required fields first", "patch": {"img": "10-rx-patient-filled", "src": [43, 464]}, "label": "Next"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 852}, "rx-doctor": {"img": "11-rx-doctor", "step": "rx-doctor", "title": "Choose your doctor", "note": "Patients pick the doctor who prescribed their medication, with each doctor's specialty shown under their name.", "task": "Tap a doctor.", "hot": [{"box": [22, 212, 369, 323], "go": "rx-list", "toastAfter": "Dr. Masinde Jere selected", "next": true, "label": "Dr. Masinde Jere"}, {"box": [22, 346, 369, 457], "go": "rx-list", "toastAfter": "Dr. Nkosingphile Kunene selected", "next": false, "label": "Dr. Nkosingphile Kunene"}, {"box": [22, 480, 369, 591], "go": "rx-list", "toastAfter": "Dr Nkhosikhona Advocate Dlamini selected", "next": false, "label": "Dr Nkhosikhona Advocate Dlamini"}, {"box": [22, 614, 369, 725], "go": "rx-list", "toastAfter": "Dr Mabundza selected", "next": false, "label": "Dr Mabundza"}, {"box": [31, 96, 364, 137], "toast": "Search isn't part of this prototype yet", "label": "Search"}, {"box": [31, 146, 364, 187], "toast": "Filters aren't part of this prototype yet", "label": "Filter"}, {"box": [330, 40, 376, 84], "toast": "Your basket is empty", "label": "Basket"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 786}, "rx-list": {"img": "12-rx-list", "step": "rx-list", "title": "Browse prescriptions", "note": "The same familiar list as non-prescription medicine, so there's nothing new to learn.", "task": "Tap Ibuprofen 200g.", "hot": [{"box": [31, 212, 364, 346], "go": "rx-product", "next": true, "label": "Ibuprofen 200g"}, {"box": [31, 364, 364, 498], "toast": "This demo follows the Ibuprofen order", "label": "Cough Syrup"}, {"box": [31, 516, 364, 650], "toast": "This demo follows the Ibuprofen order", "label": "Antacid Tablets"}, {"box": [31, 668, 364, 802], "toast": "This demo follows the Ibuprofen order", "label": "First Aid Cream"}, {"box": [31, 96, 364, 137], "toast": "Search isn't part of this prototype yet", "label": "Search"}, {"box": [31, 146, 364, 187], "toast": "Filters aren't part of this prototype yet", "label": "Filter"}, {"box": [330, 40, 376, 84], "toast": "Your basket is empty", "label": "Basket"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 852}, "rx-product": {"img": "13-rx-product", "step": "rx-product", "title": "Product details", "note": "Instructions of use and warnings sit right on the product page, written plainly.", "task": "Tap Add to basket.", "hot": [{"box": [138, 832, 260, 860], "go": "rx-added", "swap": true, "next": true, "label": "Add to basket"}, {"box": [330, 40, 376, 84], "toast": "Your basket is empty", "label": "Basket"}, {"box": [40, 266, 74, 300], "toast": "This screen isn't in the prototype yet", "label": "Previous photo"}, {"box": [318, 266, 352, 300], "toast": "This screen isn't in the prototype yet", "label": "Next photo"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 922}, "rx-added": {"img": "14-rx-added", "step": "rx-added", "title": "Added to basket", "note": "Adding the item swaps the button for a quantity control, and the basket icon shows the item count.", "task": "Tap the basket at the top right to check out.", "hot": [{"box": [330, 40, 378, 86], "go": "rx-confirm", "next": true, "label": "Basket"}, {"box": [134, 829, 171, 866], "toast": "Quantity stays at 1 in this prototype", "label": "Decrease quantity"}, {"box": [228, 829, 265, 866], "toast": "Quantity stays at 1 in this prototype", "label": "Increase quantity"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 922}, "rx-confirm": {"img": "06-order-confirmation", "step": "rx-confirm", "title": "Review and pay", "note": "Everything is reviewed on one screen. Confirm order stays disabled until a payment method is chosen, with four options including cash and insurance.", "task": "Choose a payment method, then tap Confirm order.", "fields": [{"id": "rx-confirm-pay-0", "kind": "radio", "group": "pay", "value": "Credit/Debit card", "dot": [68, 450, 86, 468], "patch": {"img": "07-order-confirmation-selected", "src": [68, 492]}}, {"id": "rx-confirm-pay-1", "kind": "radio", "group": "pay", "value": "Insurance coverage", "dot": [68, 492, 86, 510], "patch": {"img": "07-order-confirmation-selected", "src": [68, 492]}}, {"id": "rx-confirm-pay-2", "kind": "radio", "group": "pay", "value": "Cash payment (Pay at pickup)", "dot": [68, 534, 86, 552], "patch": {"img": "07-order-confirmation-selected", "src": [68, 492]}}, {"id": "rx-confirm-pay-3", "kind": "radio", "group": "pay", "value": "eWallet", "dot": [68, 576, 86, 594], "patch": {"img": "07-order-confirmation-selected", "src": [68, 492]}}], "hot": [{"box": [62, 445, 331, 475], "choose": {"group": "pay", "value": "Credit/Debit card"}, "label": "Credit/Debit card"}, {"box": [62, 487, 331, 517], "choose": {"group": "pay", "value": "Insurance coverage"}, "label": "Insurance coverage"}, {"box": [62, 529, 331, 559], "choose": {"group": "pay", "value": "Cash payment (Pay at pickup)"}, "label": "Cash payment (Pay at pickup)"}, {"box": [62, 571, 331, 601], "choose": {"group": "pay", "value": "eWallet"}, "label": "eWallet"}, {"box": [62, 812, 331, 838], "go": "rx-confirmed", "needs": ["pay"], "needsMsg": "Choose a payment method first", "patch": {"img": "07-order-confirmation-selected", "src": [62, 812]}, "label": "Confirm order"}, {"box": [282, 1042, 302, 1062], "toast": "Quantity stays at 1 in this prototype", "label": "Decrease quantity"}, {"box": [327, 1042, 347, 1062], "toast": "Quantity stays at 1 in this prototype", "label": "Increase quantity"}, {"box": [18, 42, 62, 80], "act": "back", "label": "Back"}], "h": 1268}, "rx-confirmed": {"img": "08-order-confirmed", "step": "rx-confirmed", "title": "Order confirmed", "note": "Clear pickup instructions, the order details, and the clinic's phone number for questions.", "task": "Tap Return home.", "labels": [{"box": [62, 575, 230, 595], "bg": "#ffffff", "key": "pay", "def": "Insurance coverage", "color": "#111111", "size": 10.5}], "hot": [{"box": [40, 626, 158, 643], "toast": "Receipt downloaded", "label": "Download receipt"}, {"box": [208, 626, 328, 643], "toast": "Receipt sent to your email", "label": "Email receipt"}, {"box": [41, 855, 353, 884], "scene": "final", "next": true, "label": "Return home"}], "h": 941}};
+        const STEPS = [["start", "Order your medication", "nonp"], ["#", "Non-prescription order"], ["nonp-list", "Browse medicines", "nonp"], ["nonp-product", "Product details", "nonp"], ["nonp-added", "Add to basket", "nonp"], ["patient", "Patient details", "nonp"], ["confirm", "Review and pay", "nonp"], ["confirmed", "Order confirmed", "nonp"], ["#", "Prescription order"], ["rx-patient", "Patient details", "rx"], ["rx-doctor", "Choose your doctor", "rx"], ["rx-list", "Browse prescriptions", "rx"], ["rx-product", "Product details", "rx"], ["rx-added", "Add to basket", "rx"], ["rx-confirm", "Review and pay", "rx"], ["rx-confirmed", "Order confirmed", "rx"]];
+        const SCENES = {"bridge": {"tag": "ORDER PLACED", "title": "Non-prescription order done", "text": "Next, a prescription order. It adds the patient's details and the doctor who prescribed the medicine.", "btn": "CONTINUE TO PRESCRIPTION ORDER", "go": "start", "phase": "rx", "reset": true}, "final": {"tag": "JOURNEY COMPLETE", "title": "That's the full ordering journey", "text": "Two ways to get medication ready for pickup: a quick non-prescription order, and a prescription order that adds the patient's details and their doctor.", "btn": "START AGAIN", "restart": true}};
+        const W = 393;
+        const IMG = n => `assets/Phile/proto/${n}.jpg`;
+
+        const $ = id => document.getElementById(id);
+        const screenEl = $('screen'), scroller = $('scroller'), sizer = $('sizer'), stage = $('stage');
+
+        let current = null, stack = [], filled = {}, timers = [], phase = null;
+        const REAL_STEPS = STEPS.filter(([k]) => k !== '#');
+        const STEP_INDEX = Object.fromEntries(REAL_STEPS.map(([k], i) => [k, i]));
+        const PHASE_OF = Object.fromEntries(REAL_STEPS.map(([k, , p]) => [k, p]));
+        phase = REAL_STEPS[0][2];
+        const fieldEls = {};
+
+        Object.values(SCREENS).forEach(s => { const i = new Image(); i.src = IMG(s.img); });
+
+        const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
+        const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+        const sleep = ms => new Promise(r => later(r, ms));
+        const place = (el, [x1, y1, x2, y2], inset = 0) => Object.assign(el.style, {
+            left: (x1 + inset) + 'px', top: (y1 + inset) + 'px',
+            width: (x2 - x1 - 2 * inset) + 'px', height: (y2 - y1 - 2 * inset) + 'px'
+        });
+
+        function layout() {
+            const s = SCREENS[current]; if (!s) return;
+            const k = scroller.clientWidth / W;
+            stage.style.transform = `scale(${k})`;
+            stage.style.height = s.h + 'px';
+            sizer.style.height = (s.h * k) + 'px';
+            updateChip();
+        }
+        new ResizeObserver(layout).observe(scroller);
+
+        function updateChip() {
+            // Only hint at the start of a long screen; hide as soon as people scroll
+            $('scrollChip').classList.toggle('on', scroller.scrollHeight > scroller.clientHeight + 40 && scroller.scrollTop < 60);
+        }
+        scroller.addEventListener('scroll', updateChip, { passive: true });
+
+        const fieldById = id => {
+            for (const s of Object.values(SCREENS)) for (const f of (s.fields || [])) if (f.id === id) return f;
+        };
+        const groupOf = f => f.group
+            ? (SCREENS[current].fields || []).filter(g => g.group === f.group)
+            : [f];
+        const ready = h => (h.needs || []).every(id => filled[id]);
+
+        function show(key, opts = {}) {
+            clearTimers();
+            if (!opts.noPush && current && !opts.swap) stack.push(current);
+            current = key;
+            const s = SCREENS[key];
+            $('scene').classList.remove('on');
+            stage.innerHTML = '';
+            for (const k in fieldEls) delete fieldEls[k];
+
+            const img = document.createElement('img');
+            img.src = IMG(s.img); img.alt = s.title; img.width = W; img.height = s.h;
+            stage.appendChild(img);
+
+            (s.fields || []).forEach(f => {
+                let el;
+                if (f.kind === 'text' || f.kind === 'area') {
+                    el = document.createElement('div');
+                    el.className = 'fill' + (f.kind === 'area' ? ' area' : '') + (filled[f.id] ? '' : ' empty');
+                    el.style.background = f.bg;
+                    if (f.color) el.style.color = f.color;
+                    if (f.size) el.style.fontSize = f.size + 'px';
+                    if (f.radius) el.style.borderRadius = f.radius + 'px';
+                    if (f.pad) el.style.paddingLeft = f.pad + 'px';
+                    el.textContent = filled[f.id] ? f.value : '';
+                    place(el, f.box, f.inset ?? 2);
+                } else if (f.kind === 'digit') {
+                    el = document.createElement('div');
+                    el.className = 'digit' + (f.value === '•' ? ' dot' : '');
+                    el.textContent = filled[f.id] ? f.value : '';
+                    place(el, f.box);
+                } else if (f.kind === 'radio') {
+                    el = patch(f.patch, f.dot);
+                    el.dataset.group = f.group; el.dataset.value = f.value;
+                    if (filled[f.group] !== f.value) el.classList.add('off');
+                } else if (f.kind === 'check') {
+                    el = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    el.setAttribute('viewBox', '0 0 20 20');
+                    el.setAttribute('class', 'tick' + (filled[f.id] ? '' : ' off'));
+                    el.innerHTML = `<polyline points="4,10.5 8.5,15 16,5.5" fill="none" stroke="${f.color}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+                    place(el, f.box);
+                }
+                fieldEls[f.id] = el;
+                stage.appendChild(el);
+            });
+
+            (s.labels || []).forEach(l => {
+                const el = document.createElement('div');
+                el.className = 'fill';
+                Object.assign(el.style, { background: l.bg, color: l.color, fontSize: l.size + 'px', paddingLeft: '0' });
+                el.textContent = filled[l.key] || l.def;
+                place(el, l.box);
+                stage.appendChild(el);
+            });
+
+            if (s.hot.some(h => h.scan)) {
+                const ring = document.createElement('div');
+                ring.className = 'scan-ring'; ring.id = 'scanRing';
+                place(ring, s.hot.find(h => h.scan).box);
+                stage.appendChild(ring);
+            }
+
+            // Tap-to-fill areas for text fields and code boxes
+            (s.fields || []).filter(f => f.kind !== 'check' && f.kind !== 'radio').forEach(f => {
+                stage.appendChild(hotspot({ box: f.box, field: f.id, label: 'Fill in ' + (f.group || f.id) }));
+            });
+            s.hot.forEach(h => stage.appendChild(hotspot(h)));
+            renderButtons();
+
+            scroller.scrollTop = 0;
+            layout();
+
+            const now = $('now');
+            // Screens shared by both orders guide people to the right next tap for the order in progress
+            const w = s.phases ? s.phases[phase] : null;
+            if (w) {
+                const next = stage.querySelector(`.hotspot[aria-label="${w.next}"]`);
+                if (next) next.classList.add('next');
+            }
+            const i = STEP_INDEX[s.step];
+            now.querySelector('small').textContent = i === undefined ? '' : `Step ${i + 1} of ${REAL_STEPS.length}`;
+            now.querySelector('b').textContent = s.title;
+            now.querySelector('span').textContent = w ? w.note : s.note;
+            now.querySelector('em').textContent = w ? w.task : s.task;
+            document.querySelectorAll('#steps button').forEach(btn => {
+                if (btn.dataset.key === s.step) btn.setAttribute('aria-current', 'step'); else btn.removeAttribute('aria-current');
+            });
+
+            if (s.auto) later(() => { if (current === key) show(s.auto.go); }, s.auto.ms);
+        }
+
+        function hotspot(h) {
+            const b = document.createElement('button');
+            b.className = 'hotspot';
+            b.setAttribute('aria-label', h.label);
+            if (h.field) b.dataset.field = h.field;
+            if (h.choose) b.dataset.field = h.choose.group;
+            if (h.next) b.classList.add('next');
+            place(b, h.box);
+            b.addEventListener('click', e => { e.stopPropagation(); act(h); });
+            return b;
+        }
+
+        function patch(p, box) {
+            const d = document.createElement('div');
+            d.className = 'patch';
+            Object.assign(d.style, {
+                backgroundImage: `url(${IMG(p.img)})`, backgroundSize: W + 'px auto',
+                backgroundPosition: `-${p.src[0]}px -${p.src[1]}px`
+            });
+            place(d, box);
+            return d;
+        }
+
+        function renderButtons() {
+            stage.querySelectorAll('.btn-on, .btn-patch').forEach(n => n.remove());
+            SCREENS[current].hot.filter(h => (h.btn || h.patch) && ready(h)).forEach(h => {
+                let d;
+                if (h.patch) { d = patch(h.patch, h.box); d.classList.add('btn-patch'); d.style.animation = 'pop .2s ease-out'; }
+                else { d = document.createElement('div'); d.className = 'btn-on'; d.textContent = h.btn; place(d, h.box); }
+                stage.insertBefore(d, stage.querySelector('.hotspot'));
+            });
+        }
+
+        async function fillOne(f, fast) {
+            if (filled[f.id]) return;
+            filled[f.id] = true;
+            const el = fieldEls[f.id];
+            if (!el) return;
+            if (f.kind === 'text' || f.kind === 'area') {
+                el.classList.remove('empty');
+                el.classList.add('caret');
+                const step = fast ? 6 : (f.kind === 'area' ? 18 : 34);
+                for (let i = 1; i <= f.value.length; i++) {
+                    el.textContent = f.value.slice(0, i);
+                    await sleep(step);
+                }
+                el.classList.remove('caret');
+            } else if (f.kind === 'digit') {
+                el.textContent = f.value;
+                el.classList.add('pop');
+                await sleep(fast ? 40 : 110);
+            } else if (f.kind === 'check') {
+                el.classList.remove('off'); el.classList.add('pop');
+            }
+        }
+
+        async function fillIds(ids, fast) {
+            for (const id of ids) {
+                const f = fieldById(id);
+                for (const g of groupOf(f)) await fillOne(g, fast);
+            }
+            renderButtons();
+        }
+
+        function flashNeeds(ids) {
+            stage.querySelectorAll('.hotspot').forEach(b => {
+                if (ids.includes(b.dataset.field)) { b.classList.remove('need'); void b.offsetWidth; b.classList.add('need'); }
+            });
+            later(() => stage.querySelectorAll('.hotspot.need').forEach(b => b.classList.remove('need')), 1500);
+        }
+
+        async function act(h) {
+            const here = current;
+            if (h.field) return fillIds([h.field], false);
+            if (h.choose) {
+                filled[h.choose.group] = h.choose.value;
+                stage.querySelectorAll(`.patch[data-group="${h.choose.group}"]`).forEach(d =>
+                    d.classList.toggle('off', d.dataset.value !== h.choose.value));
+                return renderButtons();
+            }
+            if (h.toggle && filled[h.toggle]) {
+                delete filled[h.toggle];
+                fieldEls[h.toggle].classList.add('off');
+                return renderButtons();
+            }
+            if (h.toast) return toast(h.toast);
+            if (h.act === 'back') return stack.length && show(stack.pop(), { noPush: true });
+            if (h.act === 'close') { stack = []; return show('welcome', { noPush: true }); }
+            if (h.hint) { flash(); return toast(h.hint); }
+            if (h.needs && !ready(h)) {
+                flashNeeds(h.needs);
+                return toast(h.needsMsg || 'Tap the boxes to fill them in first');
+            }
+            if (h.fill) {
+                const empty = h.fill.some(id => !filled[id]);
+                await fillIds(h.fill, !!(h.go || h.sendBack));
+                if (current !== here) return;
+                if ((h.go || h.sendBack) && empty) await sleep(250);
+            }
+            if (current !== here) return;
+            if (h.sendBack) {
+                await sleep(200);
+                toast(h.sendBack);
+                return stack.length ? show(stack.pop(), { noPush: true }) : show('welcome', { noPush: true });
+            }
+            if (h.toastAfter) toast(h.toastAfter);
+            if (h.scan) {
+                const ring = $('scanRing'); ring.classList.add('on');
+                return later(() => show(h.scan, { swap: true }), 1100);
+            }
+            if (h.scene) return scene(h.scene);
+            if (h.go) show(h.go, { swap: !!h.swap });
+        }
+
+        function scene(key) {
+            const sc = SCENES[key];
+            $('sceneTag').textContent = sc.tag;
+            $('sceneTitle').textContent = sc.title;
+            $('sceneText').textContent = sc.text;
+            $('sceneBtn').textContent = sc.btn;
+            $('sceneBtn').onclick = () => {
+                stack = [];
+                if (sc.restart) return restart();
+                if (sc.reset) filled = {};
+                if (sc.phase) phase = sc.phase;
+                show(sc.go, { noPush: true });
+            };
+            $('scene').classList.add('on');
+            $('sceneBtn').focus();
+        }
+
+        let toastTimer;
+        function toast(msg) {
+            const t = $('toast');
+            t.textContent = msg; t.classList.add('on');
+            clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 1800);
+        }
+
+        function flash() {
+            screenEl.classList.remove('flash'); void screenEl.offsetWidth; screenEl.classList.add('flash');
+            setTimeout(() => screenEl.classList.remove('flash'), 1500);
+        }
+
+        // Tapping a non-interactive spot flashes the tap areas, like Figma
+        screenEl.addEventListener('click', e => {
+            if (e.target.closest('.hotspot') || e.target.closest('.scene')) return;
+            flash();
+        });
+
+        $('hintToggle').addEventListener('click', e => {
+            const on = screenEl.classList.toggle('show-hints');
+            e.currentTarget.setAttribute('aria-pressed', on);
+        });
+
+        STEPS.forEach(([k, label, p]) => {
+            const li = document.createElement('li');
+            if (k === '#') { li.className = 'group'; li.textContent = label; return $('steps').appendChild(li); }
+            const b = document.createElement('button');
+            b.dataset.key = k; b.textContent = label;
+            b.addEventListener('click', () => { stack = []; phase = p; show(k, { noPush: true }); });
+            li.appendChild(b); $('steps').appendChild(li);
+        });
+
+        function restart() { filled = {}; stack = []; phase = REAL_STEPS[0][2]; show(REAL_STEPS[0][0], { noPush: true }); }
+        $('restart').addEventListener('click', restart);
+        show(REAL_STEPS[0][0], { noPush: true });
+    </script>
+</body>
+</html>

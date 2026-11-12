@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="assets/Logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Prototype</title>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text: #ffffff;
+            --yellow: #FFC21A;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Open Sans', sans-serif;
+            color: var(--text);
+            background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+                        url('assets/bg.png') no-repeat center center fixed;
+            background-size: cover;
+        }
+        a { color: inherit; }
+
+        .top { display: flex; justify-content: space-between; align-items: center; max-width: 1040px; margin: 0 auto; padding: 20px 16px 0; font-size: 0.85rem; }
+        .top a { text-decoration: none; opacity: 0.85; }
+        .top a:hover { opacity: 1; }
+        .top .hint-toggle { background: transparent; border: 1px solid var(--glass-border); color: var(--text); border-radius: 20px; padding: 6px 14px; font: inherit; cursor: pointer; }
+        .top .hint-toggle[aria-pressed="true"] { background: var(--yellow); color: #1a1a1a; border-color: var(--yellow); }
+
+        .layout { display: grid; grid-template-columns: 1fr 380px; gap: 48px; max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; align-items: start; }
+
+        /* PHONE */
+        .phone-wrap { display: flex; justify-content: center; }
+        .phone {
+            width: min(380px, 100%);
+            background: #121214;
+            border-radius: 52px;
+            padding: 12px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.45), inset 0 0 0 2px #46464c;
+            position: relative;
+        }
+        .screen {
+            position: relative;
+            border-radius: 40px;
+            overflow: hidden;
+            aspect-ratio: 780 / 1688;
+            background: #fff;
+        }
+        .screen img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transition: opacity .18s ease; }
+
+        .hotspot {
+            position: absolute;
+            border-radius: 12px;
+            cursor: pointer;
+            background: transparent;
+            border: 0;
+            padding: 0;
+            z-index: 3;
+        }
+        .hotspot:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+        .show-hints .hotspot, .flash .hotspot {
+            background: rgba(255, 194, 26, 0.28);
+            box-shadow: 0 0 0 2px var(--yellow);
+        }
+        .flash .hotspot { animation: pulse .7s ease 2; }
+        @keyframes pulse { 50% { background: rgba(255, 194, 26, 0.5); } }
+
+        .toast {
+            position: absolute; left: 50%; bottom: 7%; transform: translate(-50%, 20px);
+            background: #1a1a1a; color: #fff; padding: 10px 18px; border-radius: 22px;
+            font-size: 0.85rem; opacity: 0; transition: .25s ease; z-index: 6; white-space: nowrap; pointer-events: none;
+        }
+        .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+        /* Story interstitial inside the phone */
+        .scene {
+            position: absolute; inset: 0; z-index: 8;
+            display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            padding: 0 28px; gap: 18px;
+            background: linear-gradient(160deg, #FFD600 0%, #FF9A2E 55%, #FF5A3C 100%);
+            color: #1a1a1a;
+        }
+        .scene.on { display: flex; }
+        .scene .tag { font-family: 'Press Start 2P', cursive; font-size: 0.6rem; letter-spacing: 1px; }
+        .scene h3 { margin: 0; font-family: Georgia, serif; font-weight: normal; font-size: 1.5rem; line-height: 1.3; }
+        .scene p { margin: 0; font-size: 0.95rem; line-height: 1.5; }
+        .scene button {
+            margin-top: 6px; background: #000; color: var(--yellow); border: 0; border-radius: 26px;
+            padding: 14px 28px; font-weight: 700; letter-spacing: 1px; font-size: 0.85rem; cursor: pointer; font-family: 'Open Sans', sans-serif;
+        }
+
+        /* SIDE PANEL */
+        .panel {
+            background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px;
+            position: sticky; top: 24px;
+        }
+        .panel h1 { font-family: Georgia, serif; font-weight: normal; font-size: 1.6rem; margin: 0 0 6px; }
+        .panel .sub { opacity: 0.75; font-size: 0.85rem; margin: 0 0 22px; }
+        .now { border-left: 3px solid var(--yellow); padding-left: 14px; margin-bottom: 22px; }
+        .now b { display: block; font-family: Georgia, serif; font-weight: normal; font-size: 1.15rem; margin-bottom: 4px; }
+        .now span { font-size: 0.9rem; opacity: 0.85; line-height: 1.5; display: block; }
+        .now em { display: block; margin-top: 10px; font-style: normal; font-size: 0.8rem; color: var(--yellow); }
+        .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+        .steps li { counter-increment: s; }
+        .steps button {
+            width: 100%; text-align: left; background: transparent; border: 0; color: var(--text);
+            font: inherit; font-size: 0.85rem; padding: 7px 8px; border-radius: 8px; cursor: pointer; opacity: 0.7;
+            display: flex; gap: 10px; align-items: center;
+        }
+        .steps button::before { content: counter(s); width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--glass-border); display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
+        .steps button:hover { opacity: 1; background: rgba(255,255,255,0.06); }
+        .steps button[aria-current="step"] { opacity: 1; background: rgba(255, 194, 26, 0.15); }
+        .steps button[aria-current="step"]::before { background: var(--yellow); border-color: var(--yellow); color: #1a1a1a; }
+        .panel .restart { margin-top: 18px; background: transparent; border: 1px solid white; color: white; border-radius: 25px; padding: 9px 26px; font: inherit; font-weight: 600; cursor: pointer; }
+        .panel .restart:hover { background: white; color: black; }
+
+        @media (max-width: 860px) {
+            .layout { grid-template-columns: 1fr; gap: 24px; }
+            .panel { position: static; }
+            .steps { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top">
+        <a href="Referral.html">&larr; Back to case study</a>
+        <button class="hint-toggle" id="hintToggle" aria-pressed="false">Show tap areas</button>
+    </div>
+
+    <main class="layout">
+        <div class="phone-wrap">
+            <div class="phone">
+                <div class="screen" id="screen">
+                    <img id="shot" src="assets/Referral/01-menu-refer-a-friend.jpg" alt="">
+                    <div id="hotspots"></div>
+                    <div class="toast" id="toast">Link copied</div>
+                    <div class="scene" id="scene" role="dialog" aria-live="polite">
+                        <div class="tag" id="sceneTag"></div>
+                        <h3 id="sceneTitle"></h3>
+                        <p id="sceneText"></p>
+                        <button id="sceneBtn">CONTINUE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="panel">
+            <h1>Refer a Friend</h1>
+            <p class="sub">Tini Express web app &middot; clickable prototype. Tap the screen to move through the flow, or jump to any step.</p>
+            <div class="now" id="now"><b></b><span></span><em></em></div>
+            <ol class="steps" id="steps"></ol>
+            <button class="restart" id="restart">Restart</button>
+        </aside>
+    </main>
+
+    <script>
+        // Hotspot boxes are [x1, y1, x2, y2] in the screenshots' own 780 x 1688 pixel space.
+        const W = 780, H = 1688;
+        const IMG = n => `assets/Referral/${n}.jpg`;
+
+        const screens = {
+            menu: {
+                img: '01-menu-refer-a-friend', step: 'Open "Refer a friend"',
+                who: 'Referrer',
+                note: 'The program lives in the main menu, next to Orders and Delivery Fees.',
+                task: 'Tap "Refer a Friend".',
+                hot: [{ box: [16, 512, 646, 608], go: 'refer', label: 'Refer a Friend' }]
+            },
+            refer: {
+                img: '02-referral-refer-tab', step: 'See the offer & share',
+                who: 'Referrer',
+                note: '"Give 20% to Get 20%": three plain steps, then a personal link with one-tap Copy and WhatsApp sharing.',
+                task: 'Tap COPY, check Referral activity, or share on WhatsApp.',
+                hot: [
+                    { box: [560, 1246, 748, 1350], toast: 'Link copied', label: 'Copy link' },
+                    { box: [400, 110, 780, 200], go: 'activity', label: 'Referral activity tab' },
+                    { box: [30, 1490, 170, 1680], scene: 'shared', label: 'Share on WhatsApp' },
+                    { box: [20, 20, 90, 95], go: 'menu', label: 'Back' }
+                ]
+            },
+            activity: {
+                img: '03-referral-activity-tab', step: 'Track referrals',
+                who: 'Referrer',
+                note: 'Each friend shows as "Signed up", or "Active" once their first order is paid.',
+                task: 'Tap the Refer tab to go back and share.',
+                hot: [
+                    { box: [0, 110, 390, 200], go: 'refer', label: 'Refer tab' },
+                    { box: [20, 20, 90, 95], go: 'menu', label: 'Back' }
+                ]
+            },
+            signup: {
+                img: '04-signup-autofilled-code', step: 'Friend signs up',
+                who: 'Friend',
+                note: 'Opening the invite link fills in the referral code automatically. Nothing to type.',
+                task: 'Tap REGISTER & SEND OTP.',
+                hot: [{ box: [80, 1014, 700, 1102], scene: 'registered', label: 'Register' }]
+            },
+            welcome: {
+                img: '05-checkout-first-order-discount', step: 'First order discount',
+                who: 'Friend',
+                note: 'The welcome discount is ticked for them on the quote screen, with the E100 cap stated up front.',
+                task: 'Tap GET QUOTATION to place the first order.',
+                hot: [{ box: [82, 1342, 698, 1430], scene: 'paid', label: 'Get quotation' }]
+            },
+            reward: {
+                img: '06-checkout-20-discount', step: 'Use your reward',
+                who: 'Referrer',
+                note: 'Earned rewards stack, and the card says how many are available. One tick applies one.',
+                task: 'Tap GET QUOTATION.',
+                hot: [{ box: [82, 1342, 698, 1430], scene: 'elsewhere', label: 'Get quotation' }]
+            },
+            other: {
+                img: '07-checkout-discount-on-other-order', step: 'Discount on another order',
+                who: 'Referrer',
+                note: 'If the discount already sits on another order, the card names that order instead of hiding it.',
+                task: 'Tap the discount card to move it to this order.',
+                hot: [{ box: [82, 1042, 698, 1294], go: 'move', label: 'Discount card' }]
+            },
+            move: {
+                img: '09-move-discount-popup', step: 'Move the discount',
+                who: 'Referrer',
+                note: 'Moving the discount off an unpaid order cancels that order, so the pop-up says so plainly.',
+                task: 'Choose YES, MOVE IT or NO, KEEP FULL DELIVERY.',
+                hot: [
+                    { box: [80, 892, 700, 980], go: 'orders', label: 'Yes, move it' },
+                    { box: [80, 1000, 700, 1088], go: 'other', label: 'No, keep full delivery' }
+                ]
+            },
+            orders: {
+                img: '08-order-active-discount', step: 'See it on My Orders',
+                who: 'Referrer',
+                note: 'The new order shows "20% off delivery applied", and the cancelled one records where its discount went.',
+                task: 'That\'s the full loop. Tap the menu to start again.',
+                hot: [{ box: [24, 44, 96, 116], scene: 'end', label: 'Menu' }]
+            }
+        };
+
+        const scenes = {
+            shared: { tag: 'MEANWHILE…', title: 'Your friend taps your link in WhatsApp', text: 'They land on the Tini Express sign-up form with your referral code already filled in.', go: 'signup' },
+            registered: { tag: 'WELCOME', title: 'Account created', text: 'Your friend now has 20% off their first delivery waiting. Let\'s place that first order.', go: 'welcome' },
+            paid: { tag: 'FIRST ORDER PAID ✓', title: 'The referral is now Active', text: 'Back on your phone: you\'ve earned 20% off delivery on an order of your choice.', go: 'reward' },
+            elsewhere: { tag: 'EDGE CASE', title: 'What if the discount is already on another order?', text: 'Say you applied it to an order you haven\'t paid for yet, and now want it here instead.', go: 'other' },
+            end: { tag: 'END OF FLOW', title: 'That\'s the referral loop', text: 'Share → friend signs up → first order paid → you get rewarded. Tap below to go again.', go: 'menu' }
+        };
+
+        const order = ['menu', 'refer', 'activity', 'signup', 'welcome', 'reward', 'other', 'move', 'orders'];
+        let current = 'menu';
+
+        const $ = id => document.getElementById(id);
+        const screenEl = $('screen'), shot = $('shot'), hotspots = $('hotspots');
+
+        // Preload screens so taps feel instant
+        Object.values(screens).forEach(s => { const i = new Image(); i.src = IMG(s.img); });
+
+        function show(key) {
+            current = key;
+            const s = screens[key];
+            $('scene').classList.remove('on');
+            shot.style.opacity = 0;
+            setTimeout(() => { shot.src = IMG(s.img); shot.alt = s.step; shot.style.opacity = 1; }, 120);
+
+            hotspots.innerHTML = '';
+            s.hot.forEach(h => {
+                const [x1, y1, x2, y2] = h.box;
+                const b = document.createElement('button');
+                b.className = 'hotspot';
+                b.setAttribute('aria-label', h.label);
+                Object.assign(b.style, {
+                    left: (x1 / W * 100) + '%', top: (y1 / H * 100) + '%',
+                    width: ((x2 - x1) / W * 100) + '%', height: ((y2 - y1) / H * 100) + '%'
+                });
+                b.addEventListener('click', e => { e.stopPropagation(); act(h); });
+                hotspots.appendChild(b);
+            });
+
+            const now = $('now');
+            now.querySelector('b').textContent = `${s.who}: ${s.step}`;
+            now.querySelector('span').textContent = s.note;
+            now.querySelector('em').textContent = s.task;
+            document.querySelectorAll('#steps button').forEach(btn => {
+                if (btn.dataset.key === key) btn.setAttribute('aria-current', 'step'); else btn.removeAttribute('aria-current');
+            });
+        }
+
+        function act(h) {
+            if (h.toast) return toast(h.toast);
+            if (h.scene) return scene(h.scene);
+            if (h.go) show(h.go);
+        }
+
+        function scene(key) {
+            const sc = scenes[key];
+            $('sceneTag').textContent = sc.tag;
+            $('sceneTitle').textContent = sc.title;
+            $('sceneText').textContent = sc.text;
+            $('sceneBtn').textContent = key === 'end' ? 'START AGAIN' : 'CONTINUE';
+            $('sceneBtn').onclick = () => show(sc.go);
+            $('scene').classList.add('on');
+            $('sceneBtn').focus();
+        }
+
+        let toastTimer;
+        function toast(msg) {
+            const t = $('toast');
+            t.textContent = msg; t.classList.add('on');
+            clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 1600);
+        }
+
+        // Tapping a non-interactive part of the screen flashes the tap areas, like Figma
+        screenEl.addEventListener('click', e => {
+            if (e.target.closest('.hotspot') || e.target.closest('.scene')) return;
+            screenEl.classList.remove('flash'); void screenEl.offsetWidth; screenEl.classList.add('flash');
+            setTimeout(() => screenEl.classList.remove('flash'), 1500);
+        });
+
+        $('hintToggle').addEventListener('click', e => {
+            const on = screenEl.classList.toggle('show-hints');
+            e.currentTarget.setAttribute('aria-pressed', on);
+        });
+
+        order.forEach(k => {
+            const li = document.createElement('li');
+            const b = document.createElement('button');
+            b.dataset.key = k;
+            b.textContent = screens[k].step;
+            b.addEventListener('click', () => show(k));
+            li.appendChild(b); $('steps').appendChild(li);
+        });
+
+        $('restart').addEventListener('click', () => show('menu'));
+        show('menu');
+    </script>
+</body>
+</html>
